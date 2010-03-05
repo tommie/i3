@@ -9,7 +9,6 @@
  *
  */
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -267,7 +266,7 @@ int main(int argc, char *argv[], char *env[]) {
         }
 
         /* Initialize event loop using libev */
-        struct ev_loop *loop = ev_default_loop(0);
+        struct ev_loop *loop = ev_loop_new(0);
         if (loop == NULL)
                 die("Could not initialize libev. Bad LIBEV_FLAGS?\n");
 

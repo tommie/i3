@@ -41,6 +41,11 @@ void toggle_floating_mode(xcb_connection_t *conn, Client *client, bool automatic
         Container *con = client->container;
         i3Font *font = load_font(conn, config.font);
 
+        if (client->dock) {
+                LOG("Not putting dock client into floating mode\n");
+                return;
+        }
+
         if (con == NULL) {
                 LOG("This client is already in floating (container == NULL), re-inserting\n");
                 Client *next_tiling;
@@ -406,28 +411,37 @@ void floating_focus_direction(xcb_connection_t *conn, Client *currently_focused,
 void floating_move(xcb_connection_t *conn, Client *currently_focused, direction_t direction) {
         LOG("floating move\n");
 
+        Rect destination = currently_focused->rect;
+        Rect *screen = &(currently_focused->workspace->screen->rect);
+
         switch (direction) {
                 case D_LEFT:
-                        if (currently_focused->rect.x < 10)
-                                return;
-                        currently_focused->rect.x -= 10;
+                        destination.x -= 10;
                         break;
                 case D_RIGHT:
-                        currently_focused->rect.x += 10;
+                        destination.x += 10;
                         break;
                 case D_UP:
-                        if (currently_focused->rect.y < 10)
-                                return;
-                        currently_focused->rect.y -= 10;
+                        destination.y -= 10;
                         break;
                 case D_DOWN:
-                        currently_focused->rect.y += 10;
+                        destination.y += 10;
                         break;
                 /* to make static analyzers happy */
                 default:
                         break;
         }
 
+        /* Prevent windows from vanishing completely */
+        if ((int32_t)(destination.x + destination.width - 5) <= (int32_t)screen->x ||
+            (int32_t)(destination.x + 5) >= (int32_t)(screen->x + screen->width) ||
+            (int32_t)(destination.y + destination.height - 5) <= (int32_t)screen->y ||
+            (int32_t)(destination.y + 5) >= (int32_t)(screen->y + screen->height)) {
+                LOG("boundary check failed, not moving\n");
+                return;
+        }
+
+        currently_focused->rect = destination;
         reposition_client(conn, currently_focused);
 
         /* Because reposition_client does not send a faked configure event (only resize does),
