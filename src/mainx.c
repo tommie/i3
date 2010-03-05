@@ -374,6 +374,9 @@ int main(int argc, char *argv[], char *env[]) {
         }
 
         GET_ATOM(_NET_SUPPORTED);
+        GET_ATOM(_NET_NUMBER_OF_DESKTOPS);
+        GET_ATOM(_NET_CURRENT_DESKTOP);
+        GET_ATOM(_NET_DESKTOP_NAMES);
         GET_ATOM(_NET_WM_STATE_FULLSCREEN);
         GET_ATOM(_NET_SUPPORTING_WM_CHECK);
         GET_ATOM(_NET_WM_NAME);
