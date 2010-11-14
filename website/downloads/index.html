@@ -4,7 +4,7 @@
 <title>i3 - an improved dynamic tiling window manager</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="description" content="i3 is a dynamic tiling window manager with clean, readable and documented code, featuring extended Xinerama support, usage of libxcb instead of xlib and several improvements over wmii">
+<meta name="description" content="i3 is a dynamic tiling window manager with clean, readable and documented code, featuring extended XRandR support, usage of libxcb instead of xlib and several improvements over wmii">
 <meta name="keywords" content="i3, window, manager, tiling, keyboard, wmii, x11, xcb, xinerama, utf8">
 <meta name="author" content="i3 developers">
 <style type="text/css">
@@ -59,6 +59,9 @@ a {
     <a href="/downloads/">Downloads</a>
   </li>
   <li>
+    <a href="/blog/">Blog</a>
+  </li>
+  <li>
     <a href="/screenshots/">Screens</a>
   </li>
   <li>
@@ -86,8 +89,7 @@ a {
     <a href="http://packages.debian.org/sid/i3">Debian GNU/Linux</a>
   </li>
   <li>
-    <a href="http://aur.archlinux.org/packages.php?ID=24720">Arch Linux</a>
-    (in <a href="http://aur.archlinux.org/">AUR</a>), maintained by Atsutane
+    <a href="http://www.archlinux.org/packages/community/x86_64/i3-wm/">Arch Linux</a>, maintained by Atsutane
   </li>
   <li>
     <a href="http://overlays.gentoo.org/proj/sunrise/browser/sunrise/x11-wm/i3">Gentoo Linux</a>
@@ -104,36 +106,65 @@ a {
     <a href="http://www.openbsd.org/cgi-bin/cvsweb/ports/x11/i3/">OpenBSD</a>, maintained by bapt
   </li>
   <li>
-    <a href="http://packages.ubuntu.com/karmic/i3">Ubuntu Linux</a> (in karmic/universe)
+    <a href="https://admin.fedoraproject.org/community/?package=i3#package_maintenance">Fedora, RHEL, CentOS</a> (in EPEL), maintained by cassmodiah
+  </li>
+  <li>
+    <a href="http://packages.ubuntu.com/karmic/i3">Ubuntu Linux</a> (in karmic/universe)<br>
+    Because Ubuntu packages are always outdated, you can also install
+    up-to-date third-party i3 packages for Ubuntu by adding the following line
+    to your <code>/etc/apt/sources.list</code> and using <code>apt-get install
+    i3</code> afterwards:<br>
+    <pre>
+    deb http://debian.sur5r.net/i3/ karmic universe
+    </pre>
   </li>
 </ul>
 
 <h2>Downloads</h2>
 
 <p>
-  The current stable version is 3.δ-bf1 (transcribed 3.d-bf1 because many systems still can’t
+  The current stable version is 3.ε-bf1 (transcribed 3.e-bf1 because many systems still can’t
   handle UTF-8 in version numbers).
+</p>
+
+<p>
+  <strong>IMPORTANT:</strong> If you use the nVidia binary driver (which does
+  not support XRandR at the moment), read <a
+  href="/docs/multi-monitor.html">this document</a> for an explanation and how
+  to enable the work-around!
 </p>
 
 <ul>
   <li>
+    <a href="/downloads/i3-3.e-bf1.tar.bz2">i3-3.e-bf1.tar.bz2</a>
+    (<a href="/downloads/i3-3.e-bf1.tar.bz2.asc">GPG signature</a>), Version 3.ε-bf1, 285 KiB, 2010-06-09,
+    <a href="/downloads/RELEASE-NOTES-3.e-bf1.txt">release notes</a>
+  </li>
+
+  <li>
+    <a href="/downloads/i3-3.e.tar.bz2">i3-3.e.tar.bz2</a>
+    (<a href="/downloads/i3-3.e.tar.bz2.asc">GPG signature</a>), Version 3.ε, 271 KiB, 2010-03-30,
+    <a href="/downloads/RELEASE-NOTES-3.e.txt">release notes</a>
+  </li>
+
+  <li>
     <a href="/downloads/i3-3.d-bf1.tar.bz2">i3-3.d-bf1.tar.bz2</a>
     (<a href="/downloads/i3-3.d-bf1.tar.bz2.asc">GPG signature</a>), Version 3.δ-bf1, 153 KiB, 2009-12-21,
     <a href="/downloads/RELEASE-NOTES-3.d-bf1.txt">release notes</a>
-
   </li>
+
   <li>
     <a href="/downloads/i3-3.d.tar.bz2">i3-3.d.tar.bz2</a>
     (<a href="/downloads/i3-3.d.tar.bz2.asc">GPG signature</a>), Version 3.δ, 153 KiB, 2009-11-09,
     <a href="/downloads/RELEASE-NOTES-3.d.txt">release notes</a>
-
   </li>
+
   <li>
     <a href="/downloads/i3-3.c.tar.bz2">i3-3.c.tar.bz2</a>
     (<a href="/downloads/i3-3.c.tar.bz2.asc">GPG signature</a>), Version 3.γ, 107 KiB, 2009-08-19,
     <a href="/downloads/RELEASE-NOTES-3.c.txt">release notes</a>
-
   </li>
+
   <li>
     <a href="/downloads/i3-3.b.tar.bz2">i3-3.b.tar.bz2</a>
     (<a href="/downloads/i3-3.b.tar.bz2.asc">GPG signature</a>), Version 3.β, 96 KiB, 2009-06-26,
@@ -145,14 +176,34 @@ a {
     (<a href="/downloads/i3-3.a-bf2.tar.bz2.asc">GPG signature</a>), Version 3.α-bf2, 65 KiB, 2009-05-03,
     hotfix for a problem with -bf1
   </li>
+
   <li>
     <a href="/downloads/i3-3.a-bf1.tar.bz2">i3-3.a-bf1.tar.bz2</a>
     (<a href="/downloads/i3-3.a-bf1.tar.bz2.asc">GPG signature</a>), Version 3.α-bf1, 65 KiB, 2009-05-03,
     <a href="/downloads/RELEASE-NOTES-3.a-bf1.txt">release notes</a>
   </li>
+
   <li>
     <a href="/downloads/i3-3.a.tar.bz2">i3-3.a.tar.bz2</a>
     (<a href="/downloads/i3-3.a.tar.bz2.asc">GPG signature</a>), Version 3.α, 50 KiB, 2009-03-15
+  </li>
+</ul>
+
+<h2>People who downloaded this also liked…</h2>
+
+<ul>
+  <li>
+  <a href="http://i3.zekjur.net/i3status/">i3status – a small program to
+  generate a dzen2 or xmobar status bar</a>
+  </li>
+  <li>
+  <a href="http://i3.zekjur.net/i3lock/">i3lock – a slightly improved version
+  of slock</a>
+  </li>
+  <li>
+  <a href="http://sites.google.com/site/gotmor/dzen">dzen2 – a general purpose
+  messaging, notification and menuing program for X11</a><br>(can be used to
+  display i3status output in a bar in some corner of the screen)
   </li>
 </ul>
 

@@ -3,7 +3,7 @@
  *
  * i3 - an improved dynamic tiling window manager
  *
- * © 2009 Michael Stapelberg and contributors
+ * © 2009-2010 Michael Stapelberg and contributors
  *
  * See file LICENSE for license information.
  *
@@ -21,6 +21,7 @@
 #include "i3.h"
 #include "util.h"
 #include "xcb.h"
+#include "log.h"
 
 TAILQ_HEAD(cached_fonts_head, Font) cached_fonts = TAILQ_HEAD_INITIALIZER(cached_fonts);
 unsigned int xcb_numlock_mask;
@@ -91,20 +92,11 @@ uint32_t get_colorpixel(xcb_connection_t *conn, char *hex) {
  */
 xcb_window_t create_window(xcb_connection_t *conn, Rect dims, uint16_t window_class, int cursor,
                            bool map, uint32_t mask, uint32_t *values) {
-        xcb_window_t root = xcb_setup_roots_iterator(xcb_get_setup(conn)).data->root;
         xcb_window_t result = xcb_generate_id(conn);
         xcb_cursor_t cursor_id = xcb_generate_id(conn);
 
         /* If the window class is XCB_WINDOW_CLASS_INPUT_ONLY, depth has to be 0 */
         uint16_t depth = (window_class == XCB_WINDOW_CLASS_INPUT_ONLY ? 0 : XCB_COPY_FROM_PARENT);
-
-        /* Use the default cursor (left pointer) */
-        if (cursor > -1) {
-                i3Font *cursor_font = load_font(conn, "cursor");
-                xcb_create_glyph_cursor(conn, cursor_id, cursor_font->id, cursor_font->id,
-                                XCB_CURSOR_LEFT_PTR, XCB_CURSOR_LEFT_PTR + 1,
-                                0, 0, 0, 65535, 65535, 65535);
-        }
 
         xcb_create_window(conn,
                           depth,
@@ -117,8 +109,14 @@ xcb_window_t create_window(xcb_connection_t *conn, Rect dims, uint16_t window_cl
                           mask,
                           values);
 
-        if (cursor > -1)
-                xcb_change_window_attributes(conn, result, XCB_CW_CURSOR, &cursor_id);
+        /* Set the cursor */
+        i3Font *cursor_font = load_font(conn, "cursor");
+        xcb_create_glyph_cursor(conn, cursor_id, cursor_font->id, cursor_font->id,
+                        (cursor == -1 ? XCB_CURSOR_LEFT_PTR : cursor),
+                        (cursor == -1 ? XCB_CURSOR_LEFT_PTR : cursor) + 1,
+                        0, 0, 0, 65535, 65535, 65535);
+        xcb_change_window_attributes(conn, result, XCB_CW_CURSOR, &cursor_id);
+        xcb_free_cursor(conn, cursor_id);
 
         /* Map the window (= make it visible) */
         if (map)
@@ -270,7 +268,7 @@ void xcb_raise_window(xcb_connection_t *conn, xcb_window_t window) {
  *
  */
 void cached_pixmap_prepare(xcb_connection_t *conn, struct Cached_Pixmap *pixmap) {
-        LOG("preparing pixmap\n");
+        DLOG("preparing pixmap\n");
 
         /* If the Rect did not change, the pixmap does not need to be recreated */
         if (memcmp(&(pixmap->rect), pixmap->referred_rect, sizeof(Rect)) == 0)
@@ -279,11 +277,11 @@ void cached_pixmap_prepare(xcb_connection_t *conn, struct Cached_Pixmap *pixmap)
         memcpy(&(pixmap->rect), pixmap->referred_rect, sizeof(Rect));
 
         if (pixmap->id == 0 || pixmap->gc == 0) {
-                LOG("Creating new pixmap...\n");
+                DLOG("Creating new pixmap...\n");
                 pixmap->id = xcb_generate_id(conn);
                 pixmap->gc = xcb_generate_id(conn);
         } else {
-                LOG("Re-creating this pixmap...\n");
+                DLOG("Re-creating this pixmap...\n");
                 xcb_free_gc(conn, pixmap->gc);
                 xcb_free_pixmap(conn, pixmap->id);
         }
@@ -295,84 +293,42 @@ void cached_pixmap_prepare(xcb_connection_t *conn, struct Cached_Pixmap *pixmap)
 }
 
 /*
- * Returns the xcb_charinfo_t for the given character (specified by row and
- * column in the lookup table) if existing, otherwise the minimum bounds.
- *
- */
-static xcb_charinfo_t *get_charinfo(int col, int row, xcb_query_font_reply_t *font_info,
-                                    xcb_charinfo_t *table, bool dont_fallback) {
-        xcb_charinfo_t *result;
-
-        /* Bounds checking */
-        if (row < font_info->min_byte1 || row > font_info->max_byte1 ||
-            col < font_info->min_char_or_byte2 || col > font_info->max_char_or_byte2)
-                return NULL;
-
-        /* If we don’t have a table to lookup the infos per character, return the
-         * minimum bounds */
-        if (table == NULL)
-                return &font_info->min_bounds;
-
-        result = &table[((row - font_info->min_byte1) *
-                         (font_info->max_char_or_byte2 - font_info->min_char_or_byte2 + 1)) +
-                        (col - font_info->min_char_or_byte2)];
-
-        /* If the character has an entry in the table, return it */
-        if (result->character_width != 0 ||
-            (result->right_side_bearing |
-             result->left_side_bearing |
-             result->ascent |
-             result->descent) != 0)
-                return result;
-
-        /* Otherwise, get the default character and return its charinfo */
-        if (dont_fallback)
-                return NULL;
-
-        return get_charinfo((font_info->default_char >> 8),
-                            (font_info->default_char & 0xFF),
-                            font_info,
-                            table,
-                            true);
-}
-
-/*
- * Calculate the width of the given text (16-bit characters, UCS) with given
- * real length (amount of glyphs) using the given font.
+ * Query the width of the given text (16-bit characters, UCS) with given real
+ * length (amount of glyphs) using the given font.
  *
  */
 int predict_text_width(xcb_connection_t *conn, const char *font_pattern, char *text, int length) {
-        xcb_query_font_reply_t *font_info;
-        xcb_charinfo_t *table;
-        xcb_generic_error_t *error;
-        int i, width = 0;
         i3Font *font = load_font(conn, font_pattern);
 
-        font_info = xcb_query_font_reply(conn, xcb_query_font(conn, font->id), &error);
-        if (error != NULL) {
-                fprintf(stderr, "ERROR: query font (X error code %d)\n", error->error_code);
+        xcb_query_text_extents_cookie_t cookie;
+        xcb_query_text_extents_reply_t *reply;
+        xcb_generic_error_t *error;
+        int width;
+
+        cookie = xcb_query_text_extents(conn, font->id, length, (xcb_char2b_t*)text);
+        if ((reply = xcb_query_text_extents_reply(conn, cookie, &error)) == NULL) {
+                ELOG("Could not get text extents (X error code %d)\n",
+                     error->error_code);
                 /* We return the rather safe guess of 7 pixels, because a
                  * rendering error is better than a crash. Plus, the user will
-                 * see the error on his stderr. */
+                 * see the error in his log. */
                 return 7;
         }
 
-        /* If no per-char info is available for this font, we use the default */
-        if (xcb_query_font_char_infos_length(font_info) == 0) {
-                LOG("Falling back on default char_width of %d pixels\n", font_info->max_bounds.character_width);
-                return (font_info->max_bounds.character_width * length);
-        }
-
-        table = xcb_query_font_char_infos(font_info);
-
-        for (i = 0; i < 2 * length; i += 2) {
-                xcb_charinfo_t *info = get_charinfo(text[i+1], text[i], font_info, table, false);
-                if (info == NULL)
-                        continue;
-                width += info->character_width;
-        }
-
-        free(font_info);
-
+        width = reply->overall_width;
+        free(reply);
         return width;
+}
+
+/*
+ * Configures the given window to have the size/position specified by given rect
+ *
+ */
+void xcb_set_window_rect(xcb_connection_t *conn, xcb_window_t window, Rect r) {
+        xcb_configure_window(conn, window,
+                             XCB_CONFIG_WINDOW_X |
+                             XCB_CONFIG_WINDOW_Y |
+                             XCB_CONFIG_WINDOW_WIDTH |
+                             XCB_CONFIG_WINDOW_HEIGHT,
+                             &(r.x));
 }
