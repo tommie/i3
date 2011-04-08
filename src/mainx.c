@@ -449,7 +449,7 @@ int main(int argc, char *argv[], char *env[]) {
 
         /* Set up the atoms we support */
         check_error(conn, xcb_change_property_checked(conn, XCB_PROP_MODE_REPLACE, root, A__NET_SUPPORTED,
-                       A_ATOM, 32, 7, supported_atoms), "Could not set _NET_SUPPORTED");
+                       A_ATOM, 32, 16, supported_atoms), "Could not set _NET_SUPPORTED");
 
         ewmh_create_supporting_window();
 
