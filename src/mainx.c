@@ -485,6 +485,7 @@ int main(int argc, char *argv[], char *env[]) {
 
         DLOG("Starting on %p\n", screen->current_workspace);
         c_ws = screen->current_workspace;
+        ewmh_update_current_desktop();
 
         manage_existing_windows(conn, root);
 
