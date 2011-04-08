@@ -1,0 +1,57 @@
+_NET_SUPPORTING_WM_CHECK
+	Implemented incorrectly, must use a child window with WM name.
+	mainx.c
+
+_NET_SUPPORTED
+	mainx.c
+	supported_atoms
+	All atoms in atoms.xmacro added.
+
+_NET_NUMBER_OF_DESKTOPS
+	Not implemented
+	workspace.c
+	workspace_get() should fire this
+
+_NET_CURRENT_DESKTOP
+	Implemented, but bugs for workspaces without clients
+	workspace.c (now util.c)
+	workspace_show()
+
+_NET_DESKTOP_NAMES
+	Not implemented
+	workspace.c
+	workspace_set_name()
+
+_NET_CLIENT_LIST
+	Not implemented
+
+
+_NET_DESKTOP_GEOMETRY
+	Not implemented
+	randr.c and xinerama.c
+	Updated when screen resolutions change
+
+_NET_DESKTOP_VIEWPORT
+	Not implemented
+	randr.c and xinerama.c
+	Always (0, 0)
+
+
+_NET_VIRTUAL_ROOTS
+	Not implemented, but we don't do virtual desktops (not needed for reparenting)
+	manage.c
+	reparent_window()
+
+_NET_ACTIVE_WINDOW
+	util.c
+	set_focus()
+
+_NET_WORKAREA
+	May need clean up
+	randr.c and workspace.c
+
+_NET_DESKTOP_LAYOUT
+	Not implemented, and we don't care
+
+_NET_SHOWING_DESKTOP
+	Not implemented, and not relevant for a tiling window manager
