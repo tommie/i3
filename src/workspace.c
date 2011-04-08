@@ -185,6 +185,7 @@ void workspace_show(xcb_connection_t *conn, int workspace) {
         ipc_send_event("workspace", I3_IPC_EVENT_WORKSPACE, "{\"change\":\"focus\"}");
 
         workspace_map_clients(conn, c_ws);
+        ewmh_update_current_desktop();
 
         /* POTENTIAL TO IMPROVE HERE: due to the call to _map_clients first and
          * render_layout afterwards, there is a short flickering on the source
