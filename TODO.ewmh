@@ -1,7 +1,3 @@
-_NET_SUPPORTING_WM_CHECK
-	Implemented incorrectly, must use a child window with WM name.
-	mainx.c
-
 _NET_SUPPORTED
 	mainx.c
 	supported_atoms

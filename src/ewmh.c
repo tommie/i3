@@ -21,6 +21,44 @@
 #include "util.h"
 #include "log.h"
 
+/**
+ * Creates the _NET_SUPPORTING_WM_CHECK window and update the root window
+ * property.
+ *
+ * EWMH: The window is a direct child to the root window, with
+ * _NET_WM_NAME set to the name of the window manager.
+ */
+void ewmh_create_supporting_window()
+{
+        xcb_window_t supporting_window = xcb_generate_id(global_conn);
+        uint32_t supporting_values[] = { 0 };
+
+        check_error(global_conn,
+                    xcb_create_window_checked(global_conn,
+                                              0,
+                                              supporting_window,
+                                              root,
+                                              0, 0, 1, 1,
+                                              0,
+                                              XCB_WINDOW_CLASS_INPUT_ONLY,
+                                              XCB_WINDOW_CLASS_COPY_FROM_PARENT,
+                                              0, supporting_values),
+                    "Could not create _NET_SUPPORTING_WM_CHECK window");
+
+        check_error(global_conn,
+                    xcb_change_property_checked(global_conn, XCB_PROP_MODE_REPLACE, root, A__NET_SUPPORTING_WM_CHECK, A_WINDOW, 32, 1, &supporting_window),
+                    "Could not set the _NET_SUPPORTING_WM_CHECK property");
+
+        check_error(global_conn,
+                    xcb_change_property_checked(global_conn, XCB_PROP_MODE_REPLACE, supporting_window, A_WM_NAME, A_UTF8_STRING, 8, strlen("i3"), "i3"),
+                    "Could not set the WM_NAME property on the _NET_SUPPORTING_WM_CHECK window");
+
+        /* "i3" is ASCII, but EWMH 1.3 requires us to set the _NET_WM_NAME property. */
+        check_error(global_conn,
+                    xcb_change_property_checked(global_conn, XCB_PROP_MODE_REPLACE, supporting_window, A__NET_WM_NAME, A_UTF8_STRING, 8, strlen("i3"), "i3"),
+                    "Could not set the _NET_WM_NAME property on the _NET_SUPPORTING_WM_CHECK window");
+}
+
 /*
  * Updates _NET_CURRENT_DESKTOP with the current desktop number.
  *

@@ -12,6 +12,15 @@
 #define _EWMH_C
 
 /**
+ * Creates the _NET_SUPPORTING_WM_CHECK window and update the root window
+ * property.
+ *
+ * EWMH: The window is a direct child to the root window, with
+ * _NET_WM_NAME set to the name of the window manager.
+ */
+void ewmh_create_supporting_window();
+
+/**
  * Updates _NET_CURRENT_DESKTOP with the current desktop number.
  *
  * EWMH: The index of the current desktop. This is always an integer between 0

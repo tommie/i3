@@ -33,6 +33,7 @@
 
 #include "config.h"
 #include "data.h"
+#include "ewmh.h"
 #include "handlers.h"
 #include "click.h"
 #include "i3.h"
@@ -449,9 +450,8 @@ int main(int argc, char *argv[], char *env[]) {
         /* Set up the atoms we support */
         check_error(conn, xcb_change_property_checked(conn, XCB_PROP_MODE_REPLACE, root, A__NET_SUPPORTED,
                        A_ATOM, 32, 7, supported_atoms), "Could not set _NET_SUPPORTED");
-        /* Set up the window manager’s name */
-        xcb_change_property(conn, XCB_PROP_MODE_REPLACE, root, A__NET_SUPPORTING_WM_CHECK, A_WINDOW, 32, 1, &root);
-        xcb_change_property(conn, XCB_PROP_MODE_REPLACE, root, A__NET_WM_NAME, A_UTF8_STRING, 8, strlen("i3"), "i3");
+
+        ewmh_create_supporting_window();
 
         keysyms = xcb_key_symbols_alloc(conn);
 
