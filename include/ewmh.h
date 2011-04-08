@@ -30,6 +30,11 @@ void ewmh_create_supporting_window();
 void ewmh_update_current_desktop();
 
 /**
+ * Updates _NET_NUMBER_OF_DESKTOPS.
+ */
+void ewmh_update_number_of_desktops();
+
+/**
  * Updates _NET_ACTIVE_WINDOW with the currently focused window.
  *
  * EWMH: The window ID of the currently active window or None if no window has

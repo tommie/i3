@@ -73,6 +73,31 @@ void ewmh_update_current_desktop() {
                             &current_desktop);
 }
 
+/**
+ * Updates _NET_NUMBER_OF_DESKTOPS.
+ */
+void ewmh_update_number_of_desktops()
+{
+        uint32_t num_workspaces = 0, num_empty_workspaces = 0;
+        Workspace *ws = NULL;
+
+        /* Since the EWMH Pager expects to have CURRENT_DESKTOP within
+         * [0, NUMBER_OF_DESKTOPS), we even count workspaces without clients.
+         * Trim away workspaces at the end that don't have clients. */
+        TAILQ_FOREACH(ws, workspaces, workspaces) {
+                if (ws->output == NULL) {
+                        num_empty_workspaces++;
+                } else {
+                        num_workspaces += 1 + num_empty_workspaces;
+                        num_empty_workspaces = 0;
+                }
+        }
+
+        xcb_change_property(global_conn, XCB_PROP_MODE_REPLACE, root,
+                            A__NET_NUMBER_OF_DESKTOPS, A_CARDINAL, 32, 1,
+                            &num_workspaces);
+}
+
 /*
  * Updates _NET_ACTIVE_WINDOW with the currently focused window.
  *

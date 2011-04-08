@@ -289,6 +289,7 @@ void workspace_initialize(Workspace *ws, Output *output, bool recheck) {
         if (old_output != NULL && ws->output == old_output)
                 return;
 
+        ewmh_update_number_of_desktops();
         workspace_assign_to(ws, ws->output, false);
 }
 
@@ -412,6 +413,7 @@ void workspace_unmap_clients(xcb_connection_t *conn, Workspace *u_ws) {
                         dock->workspace = c_ws;
                 }
                 u_ws->output = NULL;
+                ewmh_update_number_of_desktops();
         }
 
         /* Unmap the stack windows on the given workspace, if any */

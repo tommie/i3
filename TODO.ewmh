@@ -3,11 +3,6 @@ _NET_SUPPORTED
 	supported_atoms
 	All atoms in atoms.xmacro added.
 
-_NET_NUMBER_OF_DESKTOPS
-	Not implemented
-	workspace.c
-	workspace_get() should fire this
-
 _NET_CURRENT_DESKTOP
 	Implemented, but bugs for workspaces without clients
 	workspace.c (now util.c)
