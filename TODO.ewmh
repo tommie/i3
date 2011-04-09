@@ -4,7 +4,7 @@ _NET_SUPPORTED
 	All atoms in atoms.xmacro added.
 
 _NET_CLIENT_LIST
-	Not implemented
+	CLIENT_LIST_STACKING isn't doing things right.
 
 
 _NET_DESKTOP_GEOMETRY

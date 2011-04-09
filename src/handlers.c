@@ -28,6 +28,7 @@
 #include <X11/XKBlib.h>
 
 #include "i3.h"
+#include "ewmh.h"
 #include "handlers.h"
 #include "table.h"
 #include "layout.h"
@@ -711,6 +712,7 @@ int handle_unmap_notify_event(void *data, xcb_connection_t *conn, xcb_unmap_noti
         FREE(client->name);
         free(client);
 
+        ewmh_update_client_list();
         render_layout(conn);
 
         /* Ensure the focus is set to the next client in the focus stack or to

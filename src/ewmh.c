@@ -59,6 +59,50 @@ void ewmh_create_supporting_window()
                     "Could not set the _NET_WM_NAME property on the _NET_SUPPORTING_WM_CHECK window");
 }
 
+/**
+ * Updates _NET_CLIENT_LIST with a complete list of client window IDs.
+ *
+ * EWMH: Two properties are used; _NET_CLIENT_LIST in initial mapping order,
+ * and _NET_CLIENT_LIST_STACKING in bottom-to-top stacking order.
+ */
+void ewmh_update_client_list()
+{
+        Workspace *ws;
+        Client *client;
+        int num_clients = 0;
+
+        TAILQ_FOREACH(ws, workspaces, workspaces) {
+                FOR_TABLE(ws) {
+                        CIRCLEQ_FOREACH(client, &(ws->table[cols][rows]->clients), clients) {
+                                num_clients++;
+                        }
+                }
+        }
+
+        xcb_window_t *windows = smalloc(num_clients * sizeof(*windows));
+        int i = 0;
+
+        TAILQ_FOREACH(ws, workspaces, workspaces) {
+                FOR_TABLE(ws) {
+                        CIRCLEQ_FOREACH(client, &(ws->table[cols][rows]->clients), clients) {
+                                windows[i++] = client->child;
+                        }
+                }
+        }
+
+        xcb_change_property(global_conn, XCB_PROP_MODE_REPLACE, root,
+                            A__NET_CLIENT_LIST, A_WINDOW, 32, num_clients,
+                            windows);
+
+        /* TODO: This should be in stacking order; so first tiles (in any
+         * order,) and then floating windows in the correct order. */
+        xcb_change_property(global_conn, XCB_PROP_MODE_REPLACE, root,
+                            A__NET_CLIENT_LIST_STACKING, A_WINDOW, 32, num_clients,
+                            windows);
+
+        free(windows);
+}
+
 /*
  * Updates _NET_CURRENT_DESKTOP with the current desktop number.
  *

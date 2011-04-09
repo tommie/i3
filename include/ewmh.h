@@ -21,6 +21,14 @@
 void ewmh_create_supporting_window();
 
 /**
+ * Updates _NET_CLIENT_LIST with a complete list of client window IDs.
+ *
+ * EWMH: Two properties are used; _NET_CLIENT_LIST in initial mapping order,
+ * and _NET_CLIENT_LIST_STACKING in bottom-to-top stacking order.
+ */
+void ewmh_update_client_list();
+
+/**
  * Updates _NET_CURRENT_DESKTOP with the current desktop number.
  *
  * EWMH: The index of the current desktop. This is always an integer between 0
