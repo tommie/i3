@@ -495,6 +495,7 @@ void reparent_window(xcb_connection_t *conn, xcb_window_t child,
                         goto map;
                 }
 
+        ewmh_update_window_desktop(new);
         ewmh_update_client_list();
         render_layout(conn);
 

@@ -60,6 +60,15 @@ void ewmh_update_number_of_desktops();
 void ewmh_update_active_window(xcb_window_t window);
 
 /**
+ * Updates _NET_WM_DESKTOP of the window.
+ *
+ * EWMH: This can be initially set by the client to request a specific
+ * workspace, and can be "all." The window manager is required to keep
+ * this property updated.
+ */
+void ewmh_update_window_desktop(Client *client);
+
+/**
  * Updates the workarea for each desktop.
  *
  * EWMH: Contains a geometry for each desktop. These geometries specify an area

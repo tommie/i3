@@ -19,6 +19,7 @@
 
 #include "util.h"
 #include "data.h"
+#include "ewmh.h"
 #include "table.h"
 #include "layout.h"
 #include "i3.h"
@@ -695,6 +696,7 @@ static void move_current_window_to_workspace(xcb_connection_t *conn, int workspa
         /* delete all empty columns/rows */
         cleanup_table(conn, container->workspace);
 
+        ewmh_update_window_desktop(current_client);
         render_layout(conn);
 
         if (workspace_is_visible(to_container->workspace)) {

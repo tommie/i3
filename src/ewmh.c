@@ -185,6 +185,26 @@ void ewmh_update_active_window(xcb_window_t window) {
                             A__NET_ACTIVE_WINDOW, A_WINDOW, 32, 1, &window);
 }
 
+/**
+ * Updates _NET_WM_DESKTOP of the window.
+ *
+ * EWMH: This can be initially set by the client to request a specific
+ * workspace, and can be "all." The window manager is required to keep
+ * this property updated.
+ */
+void ewmh_update_window_desktop(Client *client)
+{
+        if (client->workspace == NULL) {
+                /* If we don't have a workspace, don't lie about it to
+                 * the pagers. */
+                xcb_delete_property(global_conn, client->child, A__NET_WM_DESKTOP);
+                return;
+        }
+
+        xcb_change_property(global_conn, XCB_PROP_MODE_REPLACE, client->child,
+                            A__NET_WM_DESKTOP, A_CARDINAL, 32, 1, &client->workspace->num);
+}
+
 /*
  * Updates the workarea for each desktop.
  *
