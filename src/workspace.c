@@ -63,6 +63,7 @@ Workspace *workspace_get(int number) {
         }
         DLOG("done\n");
 
+        ewmh_update_desktop_names();
         ewmh_update_workarea();
 
         return ws;

@@ -30,6 +30,14 @@ void ewmh_create_supporting_window();
 void ewmh_update_current_desktop();
 
 /**
+ * Updates _NET_DESKTOP_NAMES with names of all workspaces.
+ *
+ * EWMH: Simply a list of strings. It doesn't have to match
+ * NUMBER_OF_DESKTOPS. Ordinals are used for missing names.
+ */
+void ewmh_update_desktop_names();
+
+/**
  * Updates _NET_NUMBER_OF_DESKTOPS.
  */
 void ewmh_update_number_of_desktops();

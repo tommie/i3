@@ -74,6 +74,37 @@ void ewmh_update_current_desktop() {
 }
 
 /**
+ * Updates _NET_DESKTOP_NAMES with names of all workspaces.
+ *
+ * EWMH: Simply a list of strings. It doesn't have to match
+ * NUMBER_OF_DESKTOPS. Ordinals are used for missing names.
+ */
+void ewmh_update_desktop_names()
+{
+        Workspace *ws;
+        int names_len = 0;
+
+        TAILQ_FOREACH(ws, workspaces, workspaces)
+                names_len += strlen(ws->utf8_name) + 1;
+
+        if (names_len == 0)
+                return;
+
+        DLOG("Got names in %d bytes\n", names_len);
+        char *names = smalloc(names_len);
+        int pos = 0;
+        TAILQ_FOREACH(ws, workspaces, workspaces) {
+                strcpy(names + pos, ws->utf8_name);
+                pos += strlen(ws->utf8_name) + 1;
+        }
+        xcb_change_property(global_conn, XCB_PROP_MODE_REPLACE, root,
+                            A__NET_DESKTOP_NAMES, A_UTF8_STRING, 8,
+                            names_len,
+                            names);
+        free(names);
+}
+
+/**
  * Updates _NET_NUMBER_OF_DESKTOPS.
  */
 void ewmh_update_number_of_desktops()

@@ -27,6 +27,7 @@
 #include <xcb/xcb_keysyms.h>
 
 #include "i3.h"
+#include "ewmh.h"
 #include "util.h"
 #include "config.h"
 #include "xcb.h"
@@ -399,4 +400,6 @@ void load_configuration(xcb_connection_t *conn, const char *override_configpath,
 
                 workspace_set_name(ws, NULL);
         }
+
+        ewmh_update_desktop_names();
 }

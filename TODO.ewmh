@@ -3,11 +3,6 @@ _NET_SUPPORTED
 	supported_atoms
 	All atoms in atoms.xmacro added.
 
-_NET_DESKTOP_NAMES
-	Not implemented
-	workspace.c
-	workspace_set_name()
-
 _NET_CLIENT_LIST
 	Not implemented
 
