@@ -50,7 +50,7 @@ void ewmh_create_supporting_window()
                     "Could not set the _NET_SUPPORTING_WM_CHECK property");
 
         check_error(global_conn,
-                    xcb_change_property_checked(global_conn, XCB_PROP_MODE_REPLACE, supporting_window, A_WM_NAME, A_UTF8_STRING, 8, strlen("i3"), "i3"),
+                    xcb_change_property_checked(global_conn, XCB_PROP_MODE_REPLACE, supporting_window, A_WM_NAME, XCB_ATOM_STRING, 8, strlen("i3"), "i3"),
                     "Could not set the WM_NAME property on the _NET_SUPPORTING_WM_CHECK window");
 
         /* "i3" is ASCII, but EWMH 1.3 requires us to set the _NET_WM_NAME property. */
